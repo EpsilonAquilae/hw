@@ -1,0 +1,8 @@
+1. static data is defined in .data
+1. both main and recur function calls are defined in .text
+2. .data contains all initialiazed global/local variables. .text contains the functions called
+3. "downwards" from the largest memory address allocated
+4. 48 bytes
+5. the heap starts right after the allocated static data, ie where the first malloc is located.
+6. no, each is contiguous, but are not always contiguous together
+7. |code, static data/vars, heap-> ... <-stack|

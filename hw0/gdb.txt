@@ -1,0 +1,7 @@
+1. infile is 0x602010 (a pointer)
+2. pointer to a file on disk
+3. 0x0000000000400673
+4. same details as the backtrace (ie the stack)
+5. summary of the current frame and its local vars
+6. rax and rdi contains the address of infile
+6. rdx and rsi contains the address of the inname string

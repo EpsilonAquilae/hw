@@ -1,0 +1,5 @@
+1. format: elf64-x86-64 arch: i386:x86-64
+2. .interp, .note.API-tag, .note.gnu.build-di, .gnu-hash, etc
+3. .text
+4. .text
+5. 6. yes, both adresses are contained in the segment information
