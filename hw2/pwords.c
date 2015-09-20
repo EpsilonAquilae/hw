@@ -36,7 +36,7 @@ dict_t *make_dict(char *word) {
 }
 
 void *insert_word( dict_t *d, char *word ) {
-//pthread_mutex_lock(&mutex);
+	
 	//   Insert word into dict or increment count if already there
 	//   return pointer to the updated dict
 
@@ -60,7 +60,6 @@ void *insert_word( dict_t *d, char *word ) {
 		pd->next = nd;
 		return d;					// insert beyond head 
 	}
-	//pthread_mutex_unlock(&mutex);
 	return nd;
 
 }
@@ -85,23 +84,6 @@ int get_word( char *buf, int n, FILE *infile) {
 		}
 	}
 	return 0;			// no more words
-}
-
-void *words() {
-printf("Thread Created.\n");
-	char wordbuf[MAXWORD];
-//pthread_mutex_lock(&mutex);
-	while( get_word( wordbuf, MAXWORD, infile ) ) {
-
-		pthread_mutex_lock(&mutex);
-//		get_word (wordbuf, MAXWORD, infile);
-		wd = insert_word(wd, wordbuf); // add to dict
-//printf("Added %s\n", wordbuf);
-printf("*");
-		pthread_mutex_unlock(&mutex);
-	}
-//pthread_mutex_unlock(&mutex);
-//	return wd;
 }
 
 void* producer(void *ptr){
