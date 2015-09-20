@@ -4,11 +4,11 @@
 #include <ctype.h>
 #include <pthread.h>
 
-#define NUMBER_OF_THREADS 2
+#define NUMBER_OF_THREADS 4
 #define MAXWORD 1024
 #define MAX_ITERATIONS 100000000
 
-char *buffer;
+char *buffer = NULL;
 FILE *infile;
 int producer_done = 0;
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -31,13 +31,12 @@ dict_t *make_dict(char *word) {
 	dict_t *nd = (dict_t *) malloc( sizeof(dict_t) );
 	nd->word = make_word( word );
 	nd->count = 1;
-//	pthread_mutex_t tlock = PTHREAD_MUTEX_INITIALIZER;
 	nd->next = NULL;
 	return nd;
 }
 
 void *insert_word( dict_t *d, char *word ) {
-
+//pthread_mutex_lock(&mutex);
 	//   Insert word into dict or increment count if already there
 	//   return pointer to the updated dict
 
@@ -61,6 +60,7 @@ void *insert_word( dict_t *d, char *word ) {
 		pd->next = nd;
 		return d;					// insert beyond head 
 	}
+	//pthread_mutex_unlock(&mutex);
 	return nd;
 
 }
@@ -105,7 +105,6 @@ printf("*");
 }
 
 void* producer(void *ptr){
-//	printf("Producer created.\n");
 	char wordbuf[MAXWORD];
 	int status = 1;
 	while((status = get_word( wordbuf, MAXWORD, infile ) ) == 1) {
@@ -113,40 +112,31 @@ void* producer(void *ptr){
 		while(buffer != NULL)
 			pthread_cond_wait(&condp, &mutex);
 		buffer = wordbuf;
-//		printf("Produced %s. WAITING.\n", wordbuf);
 		pthread_cond_broadcast(&condc);
 		pthread_mutex_unlock(&mutex);
-//		sleep(1);
 	}
-	buffer = NULL;
 	producer_done = 1;
 	pthread_mutex_unlock(&mutex);
-//	printf("Exited Producer.\n");
-//	printf("Buffer contains: %s\n", buffer);
 	pthread_cond_broadcast(&condc);
 	pthread_exit(0);
 }
 
 void* consumer(void *ptr){
-//	printf("Consumer created.\n");
-	while (producer_done == 0){
+	for(int i;i<1000000;i++){
 		pthread_mutex_lock(&mutex);
 		while (buffer == NULL && producer_done == 0)
 			pthread_cond_wait(&condc, &mutex);
 		if (producer_done == 1){
-//			printf("Finishing consumer !!!!.\n");
 			pthread_mutex_unlock(&mutex);
 			pthread_exit(0);
 		}
 		wd = insert_word(wd, buffer);
-//		printf("Consumed %s. WAITING.\n", buffer);
 		buffer = NULL;
 		pthread_cond_signal(&condp);
 		pthread_mutex_unlock(&mutex);
+
 	}
-//	printf("Exited Consumer.\n");
 	pthread_exit(0);
-	
 }
 
 
@@ -169,6 +159,7 @@ int main( int argc, char *argv[] ) {
 
 	pthread_t producer_thread;
 	status = pthread_create(&producer_thread, NULL, producer, NULL);
+	
 	for (int i = 0; i < NUMBER_OF_THREADS; i++){
 		status = pthread_create(&consumer_threads[i], NULL, consumer, NULL);
 	}
